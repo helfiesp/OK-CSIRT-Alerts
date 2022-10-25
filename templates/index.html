@@ -1,0 +1,96 @@
+{% load static %}
+<html>
+<header>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+<title>CSIRT</title>
+<link rel="stylesheet" href="/static/css/main_css.css">
+<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+</header>
+
+<body>
+<div class="Top_Nav">
+    <button class="Top_Nav_Button" type="submit" onclick="location.href='{% url 'index' %}'">Hjem</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'yesterdays_cve' %}'">Siste døgn</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'weekly_cve' %}'">Siste 7 dager</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'monthly_cve' %}'">Denne måneden</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'new_cve_scraper' %}'">Nye CVEer</button>
+    <!--<button class="Top_Nav_Button" onclick="location.href='{% url 'cve_search_daily' %}'">Manuell scan</button>-->
+    <!--<button class="Top_Nav_Button" onclick="location.href='{% url 'top_news_articles' %}'">News (WIP)</button>-->
+    <form action="send_alert" method="post">
+    {% csrf_token %}
+    <button class="Top_Nav_Button" type="submit">Send varsling</button>
+</div>
+<div class="CVE_table">
+    <p>{{ message|safe }}</p>
+    {% if DailyNews %}
+    <p><b>Varslinger fra andre kilder</b><br>
+    Denne seksjonen inneholder varslinger fra nyhetskilder som f.eks andre CERTer.</p>
+    <div class="News_Alerts">
+        <table class="sortable">
+            <thead>
+                <th>Kilde</th>
+                <th>Dato</th>
+                <th>Tittel</th>
+                <th>Beskrivelse</th>
+            </thead>
+            {% for article in DailyNews %}
+                <tr>
+                    <td>{{article.article_source|safe}}</td>
+                    <td>{{article.article_date}}</td>
+                    <td>{{article.article_title|safe}}</td>
+                    <td>{{article.article_description}}</td>
+                </tr>
+            {% endfor %}
+        </table>   
+    </div>
+    {% endif %}
+    <div class="CVE_Statistics">
+        <hr>
+        <b>Spørring:</b> {{ Query }}<br>
+        <b>Antall CVEer:</b> {{ CVE_Count }}<br>
+        <b>Siste scan:</b> {{ Last_scan }}
+        </p>
+    </div>
+    <table class="sortable">
+        <thead>
+            <th>CVE</th>
+            <th>Dato</th>
+            <th>Kilde</th>
+            <th>CVSS</th>
+            <th>Påvirkede systemer</th>
+            <th>OK påvirket</th>
+            <th>Tweets</th>
+            <th>Beskrivelse</th>
+            <th>Send varsling</th>
+        </thead>
+        {% for value in CVE_list  %}
+
+        <tr>
+            <td style="width: 50px;"><a href="https://nvd.nist.gov/vuln/detail/{{value.cve_url}}" target="_blank">{{value.cve_url}}</a></td>
+            <td style="width: 50px;">{{value.date}}</td>
+            <td>{{value.source}}</td>
+            {% if value.cvss_score != "N/A" %}
+                {% if value.cvss_score >= 9 %}
+                    <td class="CVSS_Score_Numeric_DarkRed">{{value.cvss_score}}</td>
+                {% elif value.cvss_score >= 7.5 and value.cvss_score < 9 %}
+                    <td class="CVSS_Score_Numeric_red">{{value.cvss_score}}</td>
+                {% elif value.cvss_score >= 5 and value.cvss_score < 7.5 %}
+                    <td class="CVSS_Score_Numeric_yellow">{{value.cvss_score}}</td>
+                {% else %}
+                    <td class="CVSS_Score_Numeric_Green">{{value.cvss_score}}</td>
+                {% endif %}
+            {% else %}
+                <td class="CVSS_Score_NA">{{value.cvss_score}}</td>
+            {% endif %}
+            <td>{{value.affected_systems|safe}}</td>
+            <td>{{value.potentially_impacted}}</td>
+            <td class="CVSS_Score_NA"><a href="https://twitter.com/search?q={{value.cve_url}}&src=typed_query" target="_blank">{{value.recent_tweets}}</td>
+            <td>{{value.description}}</td>
+            <td><input class="Alert_Checkbox" type="checkbox" name="send_alert" value="{{value.cve_url}}"></td>
+        </tr>
+        {% endfor %}
+    </form>
+    </table>
+</div>
+
+</html>

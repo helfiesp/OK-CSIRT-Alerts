@@ -1,0 +1,49 @@
+{% load static %}
+<html>
+<header>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+<title>CSIRT</title>
+<link rel="stylesheet" href="{% static 'css/main_css.css' %}">
+</header>
+
+<body>
+<div class="Top_Nav">
+    <button class="Top_Nav_Button" type="submit" onclick="location.href='{% url 'index' %}'">Hjem</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'yesterdays_cve' %}'">Siste døgn</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'weekly_cve' %}'">Siste 7 dager</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'monthly_cve' %}'">Denne måneden</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'new_cve_scraper' %}'">Nye CVEer</button>
+    <button class="Top_Nav_Button" onclick="location.href='{% url 'cve_search_daily' %}'">Manuell scan</button>
+</div>
+<div class="CVE_table">
+<h2>News scraper</h2>
+<p></p>
+
+<table class="sortable">
+    <thead>
+        <th>Time</th>
+        <th>URL</th>
+        <th>Header</th>
+        <th>Description</th>
+        <th>Keyword count</th>
+        <th>Keywords</th>
+        <th>CVES</th>
+
+    </thead>
+    {% for Entry in NewsArticles %}
+
+    <tr>
+        <td>{{Entry.TIME}}</td>
+        <td><a href="{{Entry.URL}}">{{Entry.WEBSITE}}</td>
+        <td>{{Entry.HEADER}}</td>
+        <td>{{Entry.DESCRIPTION}}</td>
+        <td>{{Entry.KEYWORD_COUNT}}</td>
+        <td>{{Entry.KEYWORDS}}</td>
+        <td>{{Entry.CVES}}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+</div>
+</html>
+
