@@ -3,7 +3,6 @@ from django.http import HttpResponse, HttpRequest
 from django.shortcuts import redirect
 import os
 from datetime import datetime
-import scripts.test as test
 import scripts.scanner as cve_scanner
 import scripts.get_cves as get_cves
 import scripts.cve_twitterscraper as twtrscraper
